@@ -11,7 +11,11 @@ import {
 const splashArtwork =
   require("../../Carregamento - Tela 1.2.png") as ImageSourcePropType;
 
-export default function SplashScreen() {
+type SplashScreenProps = {
+  onContinue: () => void;
+};
+
+export default function SplashScreen({ onContinue }: SplashScreenProps) {
   const entrance = useRef(new Animated.Value(0)).current;
   const [isReady, setIsReady] = useState(false);
 
@@ -25,7 +29,6 @@ export default function SplashScreen() {
     animation.start(({ finished }) => {
       if (finished) {
         setIsReady(true);
-        console.info("Splash screen concluída. Toque na tela para continuar.");
       }
     });
 
@@ -36,11 +39,8 @@ export default function SplashScreen() {
     <Pressable
       accessibilityLabel="Tela inicial CinetiX"
       accessibilityRole="button"
-      onPress={() => {
-        if (isReady) {
-          console.info("Toque na tela da splash detectado.");
-        }
-      }}
+      onPress={onContinue}
+      disabled={!isReady}
       style={styles.container}
     >
       <StatusBar hidden />
