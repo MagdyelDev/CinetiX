@@ -11,6 +11,13 @@
     "src/pages/login/**/*.tsx",
     "src/pages/home/**/*.ts",
     "src/pages/home/**/*.tsx",
+    "src/pages/simulator/**/*.tsx",
+    "src/pages/compare/**/*.tsx",
+    "src/pages/law/**/*.tsx",
+    "src/pages/lab/**/*.tsx",
+    "src/pages/challenges/**/*.tsx",
+    "src/pages/features/**/*.ts",
+    "src/pages/features/**/*.tsx",
     "src/componentes/**/*.ts",
     "src/componentes/**/*.tsx"
   ],

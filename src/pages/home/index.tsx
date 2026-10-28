@@ -1,28 +1,26 @@
-import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import { SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "./styles";
 
-type HomePageProps = {
-  onBackToLogin: () => void;
-};
+type Destination = "simulator" | "compare" | "law" | "lab" | "challenges";
+type HomePageProps = { userName: string; onBackToLogin: () => void; onNavigate: (destination: Destination) => void };
+type Period = "Semana" | "Mês";
+const chartData: Record<Period, { labels: string[]; values: number[] }> = { Semana: { labels: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"], values: [62,78,54,88,72,94] }, Mês: { labels: ["Sem 1","Sem 2","Sem 3","Sem 4"], values: [68,82,76,91] } };
+const navigationItems: { label: string; destination: Destination }[] = [{label:"Simulador",destination:"simulator"},{label:"Comparar",destination:"compare"},{label:"Lei da velocidade",destination:"law"},{label:"Laboratório",destination:"lab"},{label:"Desafios",destination:"challenges"}];
 
-export default function HomePage({ onBackToLogin }: HomePageProps) {
-  return (
-    <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFEFA" />
-      <Text style={styles.title}>Bem-vindo ao CinetiX</Text>
-      <Text style={styles.message}>
-        Esta tela inicial esta pronta para receber os recursos do app.
-      </Text>
-      <Text style={styles.notice}>
-        O login e demonstrativo; a autenticacao ainda nao esta conectada.
-      </Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={onBackToLogin}
-        accessibilityRole="button"
-      >
-        <Text style={styles.buttonTitle}>Voltar ao login</Text>
-      </TouchableOpacity>
-    </View>
-  );
+export default function HomePage({ userName, onBackToLogin, onNavigate }: HomePageProps) {
+  const [period,setPeriod]=useState<Period>("Semana"); const [menuOpen,setMenuOpen]=useState(false); const [dark,setDark]=useState(false);
+  const data=chartData[period]; const average=useMemo(()=>Math.round(data.values.reduce((sum,value)=>sum+value,0)/data.values.length),[data]);
+  return <SafeAreaView style={[styles.screen,dark && styles.darkScreen]}><StatusBar barStyle={dark?"light-content":"dark-content"} backgroundColor={dark?"#111827":"#FFFEFA"}/>
+    <View style={[styles.topActions,dark&&styles.darkCard]}><TouchableOpacity onPress={()=>setMenuOpen(v=>!v)} accessibilityLabel="Abrir menu"><Text style={[styles.menuIcon,dark&&styles.darkText]}>☰</Text></TouchableOpacity><Text style={[styles.appName,dark&&styles.darkText]}>CinetiX</Text><View style={{width:30}}/></View>
+    {menuOpen && <View style={[styles.menu,dark&&styles.darkMenu]}><Text style={[styles.menuTitle,dark&&styles.darkText]}>Configurações</Text><TouchableOpacity style={[styles.themeButton,dark&&styles.darkTheme]} onPress={()=>setDark(v=>!v)}><Text style={[styles.themeText,dark&&styles.darkText]}>{dark?"Tema escuro ativado":"Tema claro ativado"}</Text><Text style={styles.themeAction}>{dark?"Usar claro":"Usar escuro"}</Text></TouchableOpacity><TouchableOpacity style={styles.menuClose} onPress={()=>setMenuOpen(false)}><Text style={styles.menuCloseText}>Fechar</Text></TouchableOpacity></View>}
+    <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.headerRow}><View><Text style={[styles.greeting,dark&&styles.darkText]}>Olá, {userName}</Text><Text style={[styles.subtitle,dark&&styles.darkMuted]}>Acompanhe seu desempenho</Text></View><TouchableOpacity style={styles.logoutButton} onPress={onBackToLogin}><Text style={styles.logoutText}>Sair</Text></TouchableOpacity></View>
+      <View style={styles.summaryRow}><View style={[styles.summaryCard,dark&&styles.darkCard]}><Text style={styles.summaryValue}>{average}%</Text><Text style={[styles.summaryLabel,dark&&styles.darkMuted]}>Média geral</Text></View><View style={[styles.summaryCard,dark&&styles.darkCard]}><Text style={styles.summaryValue}>12</Text><Text style={[styles.summaryLabel,dark&&styles.darkMuted]}>Jogos realizados</Text></View></View>
+      <View style={[styles.chartCard,dark&&styles.darkCard]}><View style={styles.chartHeader}><Text style={[styles.cardTitle,dark&&styles.darkText]}>Desempenho</Text><View style={styles.periodSelector}>{(["Semana","Mês"] as Period[]).map(option=><TouchableOpacity key={option} style={[styles.periodButton,period===option&&styles.periodButtonActive]} onPress={()=>setPeriod(option)}><Text style={[styles.periodText,period===option&&styles.periodTextActive]}>{option}</Text></TouchableOpacity>)}</View></View><View style={styles.chart}>{data.values.map((value,index)=><View style={styles.barColumn} key={data.labels[index]}><Text style={styles.barValue}>{value}%</Text><View style={[styles.bar,{height:value*1.25}]}/><Text style={[styles.barLabel,dark&&styles.darkMuted]}>{data.labels[index]}</Text></View>)}</View></View>
+      <View style={[styles.activityCard,dark&&styles.darkCard]}><Text style={[styles.cardTitle,dark&&styles.darkText]}>Última atividade</Text><View style={styles.activityRow}><View style={styles.activityDot}/><View><Text style={[styles.activityTitle,dark&&styles.darkText]}>Desafio de reação concluído</Text><Text style={[styles.activityMeta,dark&&styles.darkMuted]}>94% de precisão • hoje</Text></View></View></View>
+      <Text style={[styles.learnTitle,dark&&styles.darkText]}>Explore o CinetiX</Text><View style={styles.featureGrid}>{navigationItems.map(item=><TouchableOpacity key={item.destination} style={[styles.featureButton,dark&&styles.darkFeature]} onPress={()=>onNavigate(item.destination)}><Text style={[styles.featureText,dark&&styles.darkText]}>{item.label}</Text><Text style={styles.featureArrow}>›</Text></TouchableOpacity>)}</View>
+    </ScrollView>
+    <View style={[styles.bottomNav,dark&&styles.darkCard]}>{navigationItems.slice(0,4).map(item=><TouchableOpacity key={item.destination} style={styles.navItem} onPress={()=>onNavigate(item.destination)}><Text style={styles.navIcon}>{item.destination === "simulator" ? "⚗" : item.destination === "compare" ? "⇄" : item.destination === "law" ? "ƒ" : "◷"}</Text><Text style={styles.navText} numberOfLines={1}>{item.destination === "law" ? "Lei" : item.destination === "lab" ? "Lab" : item.label}</Text></TouchableOpacity>)}</View>
+  </SafeAreaView>;
 }

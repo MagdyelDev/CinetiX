@@ -15,11 +15,19 @@ import { PrimaryButton } from "../../componentes/PrimaryButton";
 import { TextField } from "../../componentes/TextField";
 import { styles } from "./styles";
 
+type Account = { name: string; email: string; password: string };
+
 type LoginPageProps = {
-  onLoginSuccess: () => void;
+  account: Account | null;
+  onLoginSuccess: (name: string) => void;
+  onOpenRegister: () => void;
 };
 
-export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
+export default function LoginPage({
+  account,
+  onLoginSuccess,
+  onOpenRegister,
+}: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -37,7 +45,17 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
       return;
     }
 
-    onLoginSuccess();
+    const normalizedAccount = account && {
+      ...account,
+      email: account.email.trim().toLowerCase(),
+    };
+
+    if (normalizedAccount && (normalizedEmail !== normalizedAccount.email || password !== normalizedAccount.password)) {
+      Alert.alert("Dados inválidos", "E-mail ou senha incorretos.");
+      return;
+    }
+
+    onLoginSuccess(normalizedAccount?.name ?? "Visitante");
   }
 
   return (
@@ -116,12 +134,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             Ainda não tem conta?{" "}
             <Text
               style={styles.link}
-              onPress={() =>
-                Alert.alert(
-                  "Cadastro",
-                  "A tela de cadastro será adicionada em breve."
-                )
-              }
+              onPress={onOpenRegister}
               accessibilityRole="link"
             >
               Cadastre-se

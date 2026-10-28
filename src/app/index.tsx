@@ -1,5 +1,7 @@
-import { Redirect } from "expo-router";
+import { useRouter } from "expo-router";
+import SplashScreen from "../pages";
 
 export default function Index() {
-  return <Redirect href="/login" />;
+  const router = useRouter();
+  return <SplashScreen onContinue={() => router.replace("/login")} />;
 }
